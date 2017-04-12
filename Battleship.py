@@ -5,18 +5,22 @@ import time
 logging.basicConfig(filename='test.log', level=logging.DEBUG,
                     format='%(asctime)s:%(levelname)s:%(message)s')
 
+
 class player:
     len = 0
     letter = ''
 
-    def __init__(self, name):
+    def __init__(self, name, mode):
         self.name = name
+        self.mode = mode
         self.aircraft_carrier = {}
         self.battleship = {}
         self.submarine = {}
         self.cruiser = {}
         self.destroyer = {}
         self.shots = []
+        self.targets = []  # potential targets
+        self.targeting = False  # computer targeting mode
         self.destroyed = []
         self.ship_list = [self.aircraft_carrier, self.battleship, self.submarine, self.cruiser, self.destroyer]
         self.your_board = [["~"] * 10 for i in range(0, 10)]
@@ -56,11 +60,11 @@ class player:
         return (row, col)
 
     def get_coordinates(self):
-        orientation = input('Select orientation. V (Vertical) or H (Horizontal): ')
+        orientation = raw_input('Select Orientation. V (Vertical) or H (Horizontal): ')
         row, col = self.target()
         return (orientation, row, col)
 
-    def location_check(self,row, col, len, orientation):
+    def location_check(self, row, col, len, orientation):
         if orientation.upper() == 'V':
             for i in range(0, len):
                 if self.your_board[row + i][col] != '~':
@@ -94,7 +98,7 @@ class player:
                         if self.location_check(row, col, len, orientation) == True:
                             for i in range(0, len):
                                 self.your_board[row][col + i] = letter
-                                ship[(row,col + i)] = hit
+                                ship[(row, col + i)] = hit
                                 placed = True
                         else:
                             print('\nTwo ships are overlapping.\n')
@@ -121,10 +125,17 @@ class player:
                     fire = True
                     for ship in other.ship_list:
                         if (guess_row, guess_col) in ship:
-                            ship[(guess_row,guess_col)] = hit
+                            ship[(guess_row, guess_col)] = hit
+                            # after ship hit add surrounding area (NSEW) to list of targets
+                            self.targeting = True
+                            self.targets.append([guess_row+1, guess_col])  # North
+                            self.targets.append([guess_row-1, guess_col])  # South
+                            self.targets.append([guess_row, guess_col+1])  # East
+                            self.targets.append([guess_row, guess_col-1])  # West
                             print('\nShip has been hit!')
                             if all(i == True for i in ship.values()) == True:
                                 print('Ship has been sank!')
+                                self.targeting = False
                                 other.destroyed.append(ship)
                                 if self.game_over(other.destroyed) == True:
                                     return False
@@ -145,13 +156,22 @@ class player:
             print('\nGame Over!\n', self.name, 'Wins!')
             return True
 
+
 class computer(player):
 
+    # targeting modes
     def target(self):
-        row = random.randint(0, 9)
-        col = random.randint(0, 9)
-        return (row, col)
+        # if mode is easy use random targeting
+        if self.mode == 1 or self.targeting == False:
+            row = random.randint(0, 9)
+            col = random.randint(0, 9)
+            return (row, col)
+        # if mode is medium use targeting mode
+        elif self.mode == 2 and self.targeting == True:
+            loc = self.targets.pop()
+            return loc[0], loc[1]
 
+    # coordinates for boat placement
     def get_coordinates(self):
         if random.randint(0, 1) == 0:
             orientation = 'V'
@@ -161,6 +181,7 @@ class computer(player):
         row, col = self.target()
         return (orientation, row, col)
 
+    # clear board
     def reset(self):
         self.aircraft_carrier.clear()
         self.battleship.clear()
@@ -172,62 +193,68 @@ class computer(player):
         del self.ship_list[:]
         del self.your_board[:]
         del self.enemy_board[:]
+        del self.targets[:]
+        self.targeting = False
         self.ship_list = [self.aircraft_carrier, self.battleship, self.submarine, self.cruiser, self.destroyer]
         self.your_board = [["~"] * 10 for i in range(0, 10)]
         self.enemy_board = [["~"] * 10 for i in range(0, 10)]
 
+
 def main():
-    name1 = input('Enter player1\'s name: ')
-    name2 = input('Enter player2\'s name: ')
-    Player1 = player(name1)
-    Player2 = computer(name2)
-    Player1.place_ship()
-    Player2.place_ship()
-    while True:
-        if Player1.shoot(Player2) == False:
-            break
-        if Player2.shoot(Player1) == False:
-            break
+    # name1 = raw_input('Enter player1\'s name: ')
+    # name2 = raw_input('Enter player2\'s name: ')
+    mode = int(input('Select Difficulty\n(1)Easy\n(2)Medium\n(3)Hard\n(4)Extreme\n'))
+    #
+    # Player1 = player(name1, mode)
+    # Player2 = computer(name2, mode)
+    # Player1.place_ship()
+    # Player2.place_ship()
+    # while True:
+    #     if Player1.shoot(Player2) == False:
+    #         break
+    #     if Player2.shoot(Player1) == False:
+    #         break
 
     # Gathering information of the effectiveness of all random targeting approach, Yes I know it'll be terrible
     # Uncomment above code in main to play as well as the print statements in the class functions, they were slowing
     # down programming execution when running 100 of thousands of games
 
-    # start_time = time.time()
-    # name1 = 'C1'
-    # name2 = 'C2'
-    # Computer1 = computer(name1)
-    # Computer2 = computer(name2)
-    # Turns = 0
-    # avg_turn = 0
-    # shortest_game = 101
-    # num_of_games = 100000
-    # for i in range(0, num_of_games):
-    #     Computer1.place_ship()
-    #     Computer2.place_ship()
-    #     while True:
-    #         Turns += 1
-    #         if Computer1.shoot(Computer2) == False:
-    #             Computer1.reset()
-    #             Computer2.reset()
-    #             avg_turn += Turns
-    #             if Turns < shortest_game:
-    #                 shortest_game = Turns
-    #             Turns = 0
-    #             break
-    #         if Computer2.shoot(Computer1) == False:
-    #             Computer2.reset()
-    #             Computer1.reset()
-    #             avg_turn += Turns
-    #             if Turns < shortest_game:
-    #                 shortest_game = Turns
-    #             Turns = 0
-    #             break
-    # logging.info("--- Number of games: %s ---" % num_of_games)
-    # logging.info("--- Took %s seconds to execute ---" % (time.time() - start_time))
-    # avg_turn /= num_of_games
-    # logging.info("--- avg amt of turns: %s ---" % avg_turn)
-    # logging.info("--- shortest game: %s ---" % shortest_game)
+    start_time = time.time()
+    name1 = 'C1'
+    name2 = 'C2'
+    Computer1 = computer(name1, mode)
+    Computer2 = computer(name2, mode)
+    Turns = 0
+    avg_turn = 0
+    shortest_game = 101
+    num_of_games = 100000
+    for i in range(0, num_of_games):
+        Computer1.place_ship()
+        Computer2.place_ship()
+        while True:
+            Turns += 1
+            if Computer1.shoot(Computer2) == False:
+                Computer1.reset()
+                Computer2.reset()
+                avg_turn += Turns
+                if Turns < shortest_game:
+                    shortest_game = Turns
+                Turns = 0
+                break
+            if Computer2.shoot(Computer1) == False:
+                Computer2.reset()
+                Computer1.reset()
+                avg_turn += Turns
+                if Turns < shortest_game:
+                    shortest_game = Turns
+                Turns = 0
+                break
+    logging.info("--- Number of games: %s ---" % num_of_games)
+    logging.info("--- Took %s seconds to execute ---" % (time.time() - start_time))
+    avg_turn /= num_of_games
+    logging.info("--- avg amt of turns: %s ---" % avg_turn)
+    logging.info("--- shortest game: %s ---" % shortest_game)
+
 
 if __name__ == '__main__':
     main()
