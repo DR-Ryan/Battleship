@@ -148,7 +148,7 @@ class Player:
                         print('Miss!')
                 else:
                     pass
-                    # print('You cannot fire at the same location twice.')
+                    print('You cannot fire at the same location twice.')
             except ValueError:
                 print('\nCoordinates must be numbers!')
             except IndexError:
@@ -256,7 +256,7 @@ def main():
         computer2.place_ship()
         while True:
             turns += 1
-            if not computer1.shoot(computer2):
+            if computer1.shoot(computer2) == False:
                 computer1.reset()
                 computer2.reset()
                 avg_turn += turns
@@ -264,7 +264,7 @@ def main():
                     shortest_game = turns
                 turns = 0
                 break
-            if not computer2.shoot(computer1):
+            if computer2.shoot(computer1) == False:
                 computer2.reset()
                 computer1.reset()
                 avg_turn += turns
