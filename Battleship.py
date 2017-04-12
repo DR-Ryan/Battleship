@@ -1,4 +1,5 @@
 import logging
+import random
 
 logging.basicConfig(filename='test.log', level=logging.DEBUG,
                     format='%(asctime)s:%(levelname)s:%(message)s')
@@ -54,7 +55,13 @@ class player:
             letter = 'D'
         logging.info(len)
         logging.info(letter)
-        return [len, letter]
+        return (len, letter)
+
+    def get_coordinates(self):
+        orientation = input('Select orientation. V (Vertical) or H (Horizontal): ')
+        row = int(input('Select Row Coordinate: '))
+        col = int(input('Select Column Coordinate: '))
+        return (orientation, row, col)
 
     def location_check(self,row, col, len, orientation):
         if orientation.upper() == 'V':
@@ -77,9 +84,7 @@ class player:
             len, letter = self.to_be_placed(ship)
             while placed == False:
                 try:
-                    orientation = input('Select orientation. V (Vertical) or H (Horizontal): ')
-                    row = int(input('Select Row Coordinate: '))
-                    col = int(input('Select Column Coordinate: '))
+                    orientation, row, col = self.get_coordinates()
                     if orientation.upper() == 'V':
                         if self.location_check(row, col, len, orientation) == True:
                             for i in range(0, len):
@@ -150,18 +155,30 @@ class player:
             print(self.name, 'Wins!')
             return True
 
+class computer(player):
+
+    def get_coordinates(self):
+        if random.randint(0, 1) == 0:
+            orientation = 'V'
+        else:
+            orientation = 'H'
+
+        row = random.randint(0, 9)
+        col = random.randint(0, 9)
+        return (orientation, row, col)
+
 def main():
-    name1 = input('Enter player1\'s name: ')
+    #name1 = input('Enter player1\'s name: ')
     name2 = input('Enter player2\'s name: ')
-    Player1 = player(name1)
-    Player2 = player(name2)
-    Player1.place_ship()
+    #Player1 = player(name1)
+    Player2 = computer(name2)
+    # Player1.place_ship()
     Player2.place_ship()
-    while True:
-        if Player1.shoot(Player2) == False:
-            break
-        if Player2.shoot(Player1) == False:
-            break
+    # while True:
+    #     if Player1.shoot(Player2) == False:
+    #         break
+    #     if Player2.shoot(Player1) == False:
+    #         break
 
 
 if __name__ == '__main__':
