@@ -6,7 +6,7 @@ logging.basicConfig(filename='test.log', level=logging.DEBUG,
                     format='%(asctime)s:%(levelname)s:%(message)s')
 
 
-class player:
+class Player:
     len = 0
     letter = ''
 
@@ -26,51 +26,54 @@ class player:
         self.your_board = [["~"] * 10 for i in range(0, 10)]
         self.enemy_board = [["~"] * 10 for i in range(0, 10)]
 
-    def print_board(self, board):
+    @staticmethod
+    def print_board(board):
         for i in board:
             print(' '.join(i))
         return board
 
     def to_be_placed(self, ship):
+        length = 0
+        letter = ''
         if ship == self.aircraft_carrier:
             print('\nPlacing ship of length 5')
-            len = 5
+            length = 5
             letter = 'A'
         elif ship == self.battleship:
             print('\nPlacing ship of length 4')
-            len = 4
+            length = 4
             letter = 'B'
         elif ship == self.submarine:
             print('\nPlacing ship of length 3')
-            len = 3
+            length = 3
             letter = 'S'
         elif ship == self.cruiser:
             print('\nPlacing ship of length 3')
-            len = 3
+            length = 3
             letter = 'C'
         elif ship == self.destroyer:
             print('\nPlacing ship of length 2')
-            len = 2
+            length = 2
             letter = 'D'
-        return (len, letter)
+        return length, letter
 
     def target(self):
         row = int(input('Select Row Coordinate: '))
         col = int(input('Select Column Coordinate: '))
-        return (row, col)
+        return row, col
 
     def get_coordinates(self):
         orientation = raw_input('Select Orientation. V (Vertical) or H (Horizontal): ')
         row, col = self.target()
-        return (orientation, row, col)
+        return orientation, row, col
 
-    def location_check(self, row, col, len, orientation):
+    def location_check(self, row, col, length, orientation):
         if orientation.upper() == 'V':
-            for i in range(0, len):
+            for i in range(0, length):
                 if self.your_board[row + i][col] != '~':
                     return False
         elif orientation.upper() == 'H':
-            for i in range(0, len):
+            for i in range(0, length):
                 if self.your_board[row][col + i] != '~':
                     return False
         else:
@@ -82,21 +85,21 @@ class player:
         for ship in self.ship_list:
             placed = False
             hit = False
-            len, letter = self.to_be_placed(ship)
-            while placed == False:
+            length, letter = self.to_be_placed(ship)
+            while not placed:
                 try:
                     orientation, row, col = self.get_coordinates()
                     if orientation.upper() == 'V':
-                        if self.location_check(row, col, len, orientation) == True:
-                            for i in range(0, len):
+                        if self.location_check(row, col, length, orientation):
+                            for i in range(0, length):
                                 self.your_board[row + i][col] = letter
                                 ship[(row + i, col)] = hit
                                 placed = True
                         else:
                             print('\nTwo ships are overlapping.\n')
                     elif orientation.upper() == 'H':
-                        if self.location_check(row, col, len, orientation) == True:
-                            for i in range(0, len):
+                        if self.location_check(row, col, length, orientation):
+                            for i in range(0, length):
                                 self.your_board[row][col + i] = letter
                                 ship[(row, col + i)] = hit
                                 placed = True
@@ -115,7 +118,7 @@ class player:
         fire = False
         print(self.name, 'is shooting.')
         self.print_board(self.enemy_board)
-        while fire == False:
+        while not fire:
             try:
                 guess_row, guess_col = self.target()
                 if (guess_row, guess_col) not in self.shots:
@@ -133,11 +136,11 @@ class player:
                             self.targets.append([guess_row, guess_col+1])  # East
                             self.targets.append([guess_row, guess_col-1])  # West
                             print('\nShip has been hit!')
-                            if all(i == True for i in ship.values()) == True:
+                            if all(i for i in ship.values()):
                                 print('Ship has been sank!')
                                 self.targeting = False
                                 other.destroyed.append(ship)
-                                if self.game_over(other.destroyed) == True:
+                                if self.game_over(other.destroyed):
                                     return False
                             break
                     else:
@@ -145,7 +148,7 @@ class player:
                         print('Miss!')
                 else:
                     pass
-                    print('You cannot fire at the same location twice.')
+                    # print('You cannot fire at the same location twice.')
             except ValueError:
                 print('\nCoordinates must be numbers!')
             except IndexError:
@@ -157,19 +160,35 @@ class player:
             return True
 
 
-class computer(player):
+class Computer(Player):
 
     # targeting modes
     def target(self):
         # if mode is easy use random targeting
-        if self.mode == 1 or self.targeting == False:
+        if self.mode == 1:
             row = random.randint(0, 9)
             col = random.randint(0, 9)
-            return (row, col)
+            return row, col
         # if mode is medium use targeting mode
-        elif self.mode == 2 and self.targeting == True:
-            loc = self.targets.pop()
-            return loc[0], loc[1]
+        elif self.mode == 2:
+            if self.targeting:
+                loc = self.targets.pop()
+                return loc[0], loc[1]
+            else:
+                row = random.randint(0, 9)
+                col = random.randint(0, 9)
+                return row, col
+        # if mode is hard use even parity and targeting mode
+        elif self.mode == 3:
+            if self.targeting:
+                loc = self.targets.pop()
+                return loc[0], loc[1]
+            else:
+                while True:
+                    row = random.randint(0, 9)
+                    col = random.randint(0, 9)
+                    if (row + col) % 2 == 0:
+                        return row, col
 
     # coordinates for boat placement
     def get_coordinates(self):
@@ -178,8 +197,12 @@ class computer(player):
         else:
             orientation = 'H'
 
-        row, col = self.target()
-        return (orientation, row, col)
+        if self.mode == 3:
+            row = random.randint(0, 9)
+            col = random.randint(0, 9)
+        else:
+            row, col = self.target()
+        return orientation, row, col
 
     # clear board
     def reset(self):
@@ -222,32 +245,32 @@ def main():
     start_time = time.time()
     name1 = 'C1'
     name2 = 'C2'
-    Computer1 = computer(name1, mode)
-    Computer2 = computer(name2, mode)
-    Turns = 0
+    computer1 = Computer(name1, mode)
+    computer2 = Computer(name2, mode)
+    turns = 0
     avg_turn = 0
     shortest_game = 101
-    num_of_games = 100000
+    num_of_games = 10
     for i in range(0, num_of_games):
-        Computer1.place_ship()
-        Computer2.place_ship()
+        computer1.place_ship()
+        computer2.place_ship()
         while True:
-            Turns += 1
-            if Computer1.shoot(Computer2) == False:
-                Computer1.reset()
-                Computer2.reset()
-                avg_turn += Turns
-                if Turns < shortest_game:
-                    shortest_game = Turns
-                Turns = 0
+            turns += 1
+            if not computer1.shoot(computer2):
+                computer1.reset()
+                computer2.reset()
+                avg_turn += turns
+                if turns < shortest_game:
+                    shortest_game = turns
+                turns = 0
                 break
-            if Computer2.shoot(Computer1) == False:
-                Computer2.reset()
-                Computer1.reset()
-                avg_turn += Turns
-                if Turns < shortest_game:
-                    shortest_game = Turns
-                Turns = 0
+            if not computer2.shoot(computer1):
+                computer2.reset()
+                computer1.reset()
+                avg_turn += turns
+                if turns < shortest_game:
+                    shortest_game = turns
+                turns = 0
                 break
     logging.info("--- Number of games: %s ---" % num_of_games)
     logging.info("--- Took %s seconds to execute ---" % (time.time() - start_time))
