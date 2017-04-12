@@ -1,0 +1,9 @@
+Shooting function
+  easy = random target selection until a hit. 100 possible targets 10x10 board
+  medium = thinking of the board like a checker board and only targeting one color until a hit. 50 possble targets
+  hard = ???
+  
+Gui for the assignment
+Write the README
+Write the powerpoint
+Write the report
