@@ -1,6 +1,9 @@
 Shooting function
   √ easy mode = random target selection. 92 possible targets avg 
   medium mode = random target selection but after a hit search precisely to end that ship. 82 possible target avg
+  Used http://www.datagenetics.com/blog/december32011/ "a better strategy" to make medium mode.
+  Can always change to different mode.
+
   hard mode= thinking of the board like a checker board and only targeting one color until a hit. 61 possble targets avg
    
   if we feel like attempting this
