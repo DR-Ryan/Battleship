@@ -123,22 +123,27 @@ class Player:
                 guess_row, guess_col = self.target()
                 if (guess_row, guess_col) not in self.shots:
                     self.shots.append((guess_row, guess_col))
-                    self.enemy_board[guess_row][guess_col] = 'X'
-                    other.your_board[guess_row][guess_col] = 'X'
+                    # self.enemy_board[guess_row][guess_col] = 'X'
+                    # other.your_board[guess_row][guess_col] = 'X'
                     fire = True
                     for ship in other.ship_list:
                         if (guess_row, guess_col) in ship:
                             ship[(guess_row, guess_col)] = hit
+                            self.enemy_board[guess_row][guess_col] = 'X'
+                            other.your_board[guess_row][guess_col] = 'X'
                             # after ship hit add surrounding area (NSEW) to list of targets
                             self.targeting = True
-                            self.targets.append([guess_row+1, guess_col])  # North
-                            self.targets.append([guess_row-1, guess_col])  # South
-                            self.targets.append([guess_row, guess_col+1])  # East
-                            self.targets.append([guess_row, guess_col-1])  # West
+                            if guess_row - 1 > -1:
+                                self.targets.append([guess_row - 1, guess_col])  # North
+                            if guess_row + 1 < 10:
+                                self.targets.append([guess_row + 1, guess_col])  # South
+                            if guess_col - 1 > -1:
+                                self.targets.append([guess_row, guess_col - 1])  # East
+                            if guess_col + 1 < 10:
+                                self.targets.append([guess_row, guess_col + 1])  # West
                             print('\nShip has been hit!')
                             if all(i for i in ship.values()):
                                 print('Ship has been sank!')
-                                self.targeting = False
                                 other.destroyed.append(ship)
                                 if self.game_over(other.destroyed):
                                     return False
@@ -146,6 +151,8 @@ class Player:
                     else:
                         pass
                         print('Miss!')
+                        self.enemy_board[guess_row][guess_col] = 'O'
+                        other.your_board[guess_row][guess_col] = 'O'
                 else:
                     pass
                     print('You cannot fire at the same location twice.')
@@ -156,7 +163,8 @@ class Player:
 
     def game_over(self, destroyed):
         if len(destroyed) == 5:
-            print('\nGame Over!\n', self.name, 'Wins!')
+            self.print_board(self.enemy_board)
+            print("\nGame Over!\n" + self.name + " Wins!")
             return True
 
 
@@ -171,6 +179,8 @@ class Computer(Player):
             return row, col
         # if mode is medium use targeting mode
         elif self.mode == 2:
+            if len(self.targets) == 0:
+                self.targeting = False
             if self.targeting:
                 loc = self.targets.pop()
                 return loc[0], loc[1]
@@ -180,6 +190,8 @@ class Computer(Player):
                 return row, col
         # if mode is hard use even parity and targeting mode
         elif self.mode == 3:
+            if len(self.targets) == 0:
+                self.targeting = False
             if self.targeting:
                 loc = self.targets.pop()
                 return loc[0], loc[1]
