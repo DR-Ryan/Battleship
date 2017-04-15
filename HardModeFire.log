@@ -1,0 +1,28 @@
+2017-04-15 00:16:41,641:INFO:--- Number of games: 1 ---
+2017-04-15 00:16:41,641:INFO:--- Took 0.0034160614013671875 seconds to execute ---
+2017-04-15 00:16:41,642:INFO:--- avg amt of turns: 54.0 ---
+2017-04-15 00:16:41,642:INFO:--- shortest game: 54 ---
+2017-04-15 00:16:49,336:INFO:--- Number of games: 10 ---
+2017-04-15 00:16:49,337:INFO:--- Took 0.018568754196166992 seconds to execute ---
+2017-04-15 00:16:49,337:INFO:--- avg amt of turns: 56.4 ---
+2017-04-15 00:16:49,337:INFO:--- shortest game: 47 ---
+2017-04-15 00:16:55,977:INFO:--- Number of games: 100 ---
+2017-04-15 00:16:55,977:INFO:--- Took 0.16352391242980957 seconds to execute ---
+2017-04-15 00:16:55,977:INFO:--- avg amt of turns: 55.43 ---
+2017-04-15 00:16:55,977:INFO:--- shortest game: 29 ---
+2017-04-15 00:17:05,801:INFO:--- Number of games: 1000 ---
+2017-04-15 00:17:05,801:INFO:--- Took 1.6509618759155273 seconds to execute ---
+2017-04-15 00:17:05,801:INFO:--- avg amt of turns: 55.8 ---
+2017-04-15 00:17:05,801:INFO:--- shortest game: 32 ---
+2017-04-15 00:17:29,732:INFO:--- Number of games: 10000 ---
+2017-04-15 00:17:29,732:INFO:--- Took 17.70227289199829 seconds to execute ---
+2017-04-15 00:17:29,732:INFO:--- avg amt of turns: 56.3467 ---
+2017-04-15 00:17:29,732:INFO:--- shortest game: 27 ---
+2017-04-15 00:20:37,886:INFO:--- Number of games: 100000 ---
+2017-04-15 00:20:37,886:INFO:--- Took 168.72459506988525 seconds to execute ---
+2017-04-15 00:20:37,886:INFO:--- avg amt of turns: 56.29943 ---
+2017-04-15 00:20:37,886:INFO:--- shortest game: 22 ---
+2017-04-15 00:50:49,516:INFO:--- Number of games: 1000000 ---
+2017-04-15 00:50:49,517:INFO:--- Took 1754.1763780117035 seconds to execute ---
+2017-04-15 00:50:49,517:INFO:--- avg amt of turns: 56.286124 ---
+2017-04-15 00:50:49,517:INFO:--- shortest game: 20 ---
