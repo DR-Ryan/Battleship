@@ -282,7 +282,7 @@ def main():
                 computer1.reset()
                 break
     else:
-        ('Bad input')
+        print('Follow Directions Better!')
 
 if __name__ == '__main__':
     main()
