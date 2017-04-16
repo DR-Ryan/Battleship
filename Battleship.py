@@ -1,18 +1,14 @@
-import logging
 import random
 import time
-
-logging.basicConfig(filename='test.log', level=logging.DEBUG,
-                    format='%(asctime)s:%(levelname)s:%(message)s')
-
 
 class Player:
     len = 0
     letter = ''
 
-    def __init__(self, name, mode):
+    def __init__(self, name, mode, difficulty):
         self.name = name
         self.mode = mode
+        self.difficulty = difficulty
         self.aircraft_carrier = {}
         self.battleship = {}
         self.submarine = {}
@@ -63,7 +59,7 @@ class Player:
         return row, col
 
     def get_coordinates(self):
-        orientation = raw_input('Select Orientation. V (Vertical) or H (Horizontal): ')
+        orientation = input('Select Orientation. V (Vertical) or H (Horizontal): ')
         row, col = self.target()
         return orientation, row, col
 
@@ -96,7 +92,10 @@ class Player:
                                 ship[(row + i, col)] = hit
                                 placed = True
                         else:
-                            print('\nTwo ships are overlapping.\n')
+                            if self.mode == 1 and self.name == 'Computer':
+                                pass
+                            else:
+                                print('\nTwo ships are overlapping.\n')
                     elif orientation.upper() == 'H':
                         if self.location_check(row, col, length, orientation):
                             for i in range(0, length):
@@ -104,14 +103,24 @@ class Player:
                                 ship[(row, col + i)] = hit
                                 placed = True
                         else:
-                            print('\nTwo ships are overlapping.\n')
+                            if self.mode == 1 and self.name == 'Computer':
+                                pass
+                            else:
+                                print('\nTwo ships are overlapping.\n')
                     else:
                         print('\nOnly enter in V or H for the orientation.\n')
                 except ValueError:
                     print('\nBoth coordinates should be numbers.\n')
                 except IndexError:
-                    print('\nYou placed the ship outside of the ocean.\n')
-            self.print_board(self.your_board)
+                    if self.mode == 1 and self.name == 'Computer':
+                        pass
+                    else:
+                        print('\nYou placed the ship outside of the ocean.\n')
+            if self.mode == 1 and self.name == 'Computer':
+                pass
+            else:
+                self.print_board(self.your_board)
+
 
     def shoot(self, other):
         hit = True
@@ -122,6 +131,8 @@ class Player:
             try:
                 guess_row, guess_col = self.target()
                 if (guess_row, guess_col) not in self.shots:
+                    #if self.mode == 2:
+                    #    time.sleep(1.5)
                     self.shots.append((guess_row, guess_col))
                     # self.enemy_board[guess_row][guess_col] = 'X'
                     # other.your_board[guess_row][guess_col] = 'X'
@@ -144,18 +155,20 @@ class Player:
                             print('\nShip has been hit!')
                             if all(i for i in ship.values()):
                                 print('Ship has been sank!')
+                                time.sleep(1.2)
                                 other.destroyed.append(ship)
                                 if self.game_over(other.destroyed):
                                     return False
                             break
                     else:
-                        pass
                         print('Miss!')
                         self.enemy_board[guess_row][guess_col] = 'O'
                         other.your_board[guess_row][guess_col] = 'O'
                 else:
-                    pass
-                    print('You cannot fire at the same location twice.')
+                    if self.mode == 2 or self.mode == 1 and self.name == 'Computer':
+                        pass
+                    else:
+                        print('You cannot fire at the same location twice.')
             except ValueError:
                 print('\nCoordinates must be numbers!')
             except IndexError:
@@ -173,12 +186,12 @@ class Computer(Player):
     # targeting modes
     def target(self):
         # if mode is easy use random targeting
-        if self.mode == 1:
+        if self.difficulty == 1:
             row = random.randint(0, 9)
             col = random.randint(0, 9)
             return row, col
         # if mode is medium use targeting mode
-        elif self.mode == 2:
+        elif self.difficulty == 2:
             if len(self.targets) == 0:
                 self.targeting = False
             if self.targeting:
@@ -189,7 +202,7 @@ class Computer(Player):
                 col = random.randint(0, 9)
                 return row, col
         # if mode is hard use even parity and targeting mode
-        elif self.mode == 3:
+        elif self.difficulty == 3:
             if len(self.targets) == 0:
                 self.targeting = False
             if self.targeting:
@@ -209,7 +222,7 @@ class Computer(Player):
         else:
             orientation = 'H'
 
-        if self.mode == 3:
+        if self.difficulty == 3:
             row = random.randint(0, 9)
             col = random.randint(0, 9)
         else:
@@ -236,60 +249,40 @@ class Computer(Player):
 
 
 def main():
-    # name1 = raw_input('Enter player1\'s name: ')
-    # name2 = raw_input('Enter player2\'s name: ')
-    mode = int(input('Select Difficulty\n(1)Easy\n(2)Medium\n(3)Hard\n(4)Extreme\n'))
-    #
-    # Player1 = player(name1, mode)
-    # Player2 = computer(name2, mode)
-    # Player1.place_ship()
-    # Player2.place_ship()
-    # while True:
-    #     if Player1.shoot(Player2) == False:
-    #         break
-    #     if Player2.shoot(Player1) == False:
-    #         break
 
-    # Gathering information of the effectiveness of all random targeting approach, Yes I know it'll be terrible
-    # Uncomment above code in main to play as well as the print statements in the class functions, they were slowing
-    # down programming execution when running 100 of thousands of games
+    mode = int(input('(1) Human Vs AI \n(2) AI vs AI\n'))
+    difficulty = int(input('Select Difficulty\n(1)Easy\n(2)Medium\n(3)Hard\n'))
 
-    start_time = time.time()
-    name1 = 'C1'
-    name2 = 'C2'
-    computer1 = Computer(name1, mode)
-    computer2 = Computer(name2, mode)
-    turns = 0
-    avg_turn = 0
-    shortest_game = 101
-    num_of_games = 10
-    for i in range(0, num_of_games):
+    if mode == 1:
+         name1 = input('Enter player1\'s name: ')
+         name2 = 'Computer'
+         Player1 = Player(name1, mode, difficulty)
+         Player2 = Computer(name2, mode, difficulty)
+         Player1.place_ship()
+         Player2.place_ship()
+         while True:
+             if Player1.shoot(Player2) == False:
+                 break
+             if Player2.shoot(Player1) == False:
+                 break
+    elif mode == 2:
+        name1 = 'Computer One'
+        name2 = 'Computer Two'
+        computer1 = Computer(name1, mode, difficulty)
+        computer2 = Computer(name2, mode, difficulty)
         computer1.place_ship()
         computer2.place_ship()
         while True:
-            turns += 1
             if computer1.shoot(computer2) == False:
                 computer1.reset()
                 computer2.reset()
-                avg_turn += turns
-                if turns < shortest_game:
-                    shortest_game = turns
-                turns = 0
                 break
             if computer2.shoot(computer1) == False:
                 computer2.reset()
                 computer1.reset()
-                avg_turn += turns
-                if turns < shortest_game:
-                    shortest_game = turns
-                turns = 0
                 break
-    logging.info("--- Number of games: %s ---" % num_of_games)
-    logging.info("--- Took %s seconds to execute ---" % (time.time() - start_time))
-    avg_turn /= num_of_games
-    logging.info("--- avg amt of turns: %s ---" % avg_turn)
-    logging.info("--- shortest game: %s ---" % shortest_game)
-
+    else:
+        ('Bad input')
 
 if __name__ == '__main__':
     main()
