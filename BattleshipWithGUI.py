@@ -29,27 +29,32 @@ class Player:
             print(' '.join(i))
         return board
 
-    def to_be_placed(self, ship):
+    def to_be_placed(self, ship, mode):
         length = 0
         letter = ''
         if ship == self.aircraft_carrier:
-            print('\nPlacing ship of length 5')
+            if mode == 1:
+                print('\nPlacing ship of length 5')
             length = 5
             letter = 'A'
         elif ship == self.battleship:
-            print('\nPlacing ship of length 4')
+            if mode == 1:
+                print('\nPlacing ship of length 4')
             length = 4
             letter = 'B'
         elif ship == self.submarine:
-            print('\nPlacing ship of length 3')
+            if mode == 1:
+                print('\nPlacing ship of length 3')
             length = 3
             letter = 'S'
         elif ship == self.cruiser:
-            print('\nPlacing ship of length 3')
+            if mode == 1:
+                print('\nPlacing ship of length 3')
             length = 3
             letter = 'C'
         elif ship == self.destroyer:
-            print('\nPlacing ship of length 2')
+            if mode == 1:
+                print('\nPlacing ship of length 2')
             length = 2
             letter = 'D'
         return length, letter
@@ -82,7 +87,7 @@ class Player:
         for ship in self.ship_list:
             placed = False
             hit = False
-            length, letter = self.to_be_placed(ship)
+            length, letter = self.to_be_placed(ship, self.mode)
             while not placed:
                 try:
                     orientation, row, col = self.get_coordinates()
@@ -117,26 +122,16 @@ class Player:
                         pass
                     else:
                         print('\nYou placed the ship outside of the ocean.\n')
-            # if self.mode == 1 and self.name == 'Computer':
-            #     pass
-            # else:
-            #     self.print_board(self.your_board)
-
 
     def shoot(self, other):
         hit = True
         fire = False
-        print(self.name, 'is shooting.')
-        #self.print_board(self.enemy_board)
+        #print(self.name, 'is shooting.')
         while not fire:
             try:
                 guess_row, guess_col = self.target()
                 if (guess_row, guess_col) not in self.shots:
-                    #if self.mode == 2:
-                    #    time.sleep(1.5)
                     self.shots.append((guess_row, guess_col))
-                    # self.enemy_board[guess_row][guess_col] = 'X'
-                    # other.your_board[guess_row][guess_col] = 'X'
                     fire = True
                     for ship in other.ship_list:
                         if (guess_row, guess_col) in ship:
@@ -153,16 +148,16 @@ class Player:
                                 self.targets.append([guess_row, guess_col - 1])  # East
                             if guess_col + 1 < 10:
                                 self.targets.append([guess_row, guess_col + 1])  # West
-                            print('\nShip has been hit!')
+                            #print('\nShip has been hit!')
                             if all(i for i in ship.values()):
-                                print('Ship has been sank!')
+                                #print('Ship has been sank!')
                                 time.sleep(1.2)
                                 other.destroyed.append(ship)
                                 if self.game_over(other.destroyed):
                                     return False
                             break
                     else:
-                        print('Miss!')
+                        #print('Miss!')
                         self.enemy_board[guess_row][guess_col] = 'O'
                         other.your_board[guess_row][guess_col] = 'O'
                 else:
@@ -179,11 +174,11 @@ class Player:
         if len(destroyed) == 5:
             self.print_board(self.enemy_board)
             print("\nGame Over!\n" + self.name + " Wins!")
+            time.sleep(5)
             return True
 
 
 class Computer(Player):
-
     # targeting modes
     def target(self):
         # if mode is easy use random targeting
@@ -249,10 +244,6 @@ class Computer(Player):
         self.enemy_board = [["~"] * 10 for i in range(0, 10)]
 
 
-
-
-
-
 def visualized(Player, Other):
     # Define some colors
     BLACK = (0, 0, 0)
@@ -264,22 +255,20 @@ def visualized(Player, Other):
     pygame.init()
 
     # Set the width and height of the screen [width, height]
-    size = (510, 255)
-    width = 20
-    height = 20
+    size = (1020, 510)
+    width = 40
+    height = 40
 
     # Set the margin of the screen
-    margin = 5
+    margin = 10
 
-# Set the grid up
+    # Set the grid up
     screen = pygame.display.set_mode(size)
     screen2 = pygame.display.set_mode(size)
     pygame.display.set_caption(Player.name)
 
     # Loop until the user clicks the close button.
     done = False
-
-    # Variables to make BS work
 
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
@@ -290,25 +279,17 @@ def visualized(Player, Other):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 done = True
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                m_col = pos[0] // (width + margin)
-                m_row = pos[1] // (height + margin)
-                if Player.enemy_board[m_row][m_col] == "~":
-                    Player.enemy_board[m_row][m_col] = "0"
-                else:
-                    grid[m_row][m_col] = "X"
-                print("Row: ", m_row , "Column: ", m_col)
+
 
         # --- Game logic should go here
         if Player.shoot(Other) == False:
             Player.reset()
             Other.reset()
-            done = True
+            break
         if Other.shoot(Player) == False:
             Other.reset()
             Player.reset()
-            done = True
+            break
         # --- Screen-clearing code goes here
 
         # Here, we clear the screen to white. Don't put other drawing commands
@@ -333,7 +314,7 @@ def visualized(Player, Other):
                 else:
                     color = WHITE
 
-                pygame.draw.rect(screen, color, [260 + column * (width + margin),
+                pygame.draw.rect(screen, color, [520 + column * (width + margin),
                                                  margin + row * (height + margin),
                                                  width, height])
         for column in range(0, 10):
@@ -357,7 +338,6 @@ def visualized(Player, Other):
         # --- Limit to 60 frames per second
         clock.tick(30)
         time.sleep(1)
-        # done = True
     # Close the window and quit.
     pygame.quit()
 
@@ -373,12 +353,10 @@ def main():
          Player2 = Computer(name2, mode, difficulty)
          Player1.place_ship()
          Player2.place_ship()
+         time.sleep(3)
          while True:
              visualized(Player1, Player2)
-             # if Player1.shoot(Player2) == False:
-             #     break
-             # if Player2.shoot(Player1) == False:
-             #     break
+
     elif mode == 2:
         name1 = 'Computer One'
         name2 = 'Computer Two'
@@ -386,17 +364,9 @@ def main():
         computer2 = Computer(name2, mode, difficulty)
         computer1.place_ship()
         computer2.place_ship()
+        time.sleep(3)
         while True:
             visualized(computer1, computer2)
-            # if computer1.shoot(computer2) == False:
-            #     computer1.reset()
-            #     computer2.reset()
-            #     break
-            # if computer2.shoot(computer1) == False:
-            #     computer2.reset()
-            #     computer1.reset()
-            #     break
-            # print("About to wait")
             break
     else:
         print('Bad input')
